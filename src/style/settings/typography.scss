@@ -1,0 +1,12 @@
+@font-face {
+  font-family: "KelsonSans";
+  src: url("~/assets/Kelson Sans Regular.otf") format("OTF")
+}
+
+$font-size: 18px;
+
+$decorator-size: 8rem;
+
+$line-height: 12px;
+
+$font-stack: 'KelsonSans', sans-serif;

@@ -1,0 +1,21 @@
+html,
+body {
+    font: $font-size/1.5 $font-stack;
+    font-family: "KelsonSans", sans-serif;
+    line-height: $line-height;
+	background: var(--alpha-background);
+    -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+    background: var(--alpha-color);
+	color: var(--alpha-background);
+}
+
+body {
+    margin: 0;
+}
+
+p, h1, h2, h3{
+    color: white;
+}

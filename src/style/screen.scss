@@ -1,0 +1,15 @@
+@import './settings/reset.scss';
+@import './settings/typography.scss';
+@import './settings/color.scss';
+
+@import './generic/reset.scss';
+
+@import './elements/page.scss';
+
+@import './components/header.scss';
+@import './components/footer.scss';
+@import './components/typeSelection.scss';
+
+
+@import './MediaQueries/mediaquery.scss';
+@import './MediaQueries/printstyles.scss';

@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<header>
+    <nav class="c-header">
+        <div class="c-header__logo">
+            <img class="c-header__logo-item" src="~/assets/esn-star.png" />
+        </div>
+    </nav>
+</header>
+
+
+<div class="c-type-selection__container">
+    <a class="c-type-selection__item c-type-selection__karaoke" asp-area="" asp-controller="Home" asp-action="Karaoke">
+        <img class="c-type-selection__item-image--karaoke" src="~/assets/karaoke.jpg" />
+        <p class="c-type-selection__item-text--karaoke">Karaoke</p>
+    </a>
+    <a class="c-type-selection__item c-type-selection__playlist" asp-area="" asp-controller="Home" asp-action="Playlist">
+        <img class="c-type-selection__item-image--playlist" src="~/assets/vinyls.jpg" />
+        <p class="c-type-selection__item-text--playlist">Playlist</p>
+    </a>
+</div>
+
+
+<footer class="c-footer">
+    <div class="c-footer__item">
+        <img class="c-footer__logo-item" src="~/assets/White_LogoESN.png" />
+        <p class="c-footer__item-creator">
+            Made by Bram Robyn (Equinox)
+        </p>
+        <p class="c-footer__item-name">
+            &copy; 2020 - ESN Sonus
+        </p>
+    </div>
+</footer>
+
+
+@*<div class="container">
+        <div class="row">&nbsp;</div>
+        <div class="row">
+            <div class="col-2">User</div>
+            <div class="col-4"><input type="text" id="userInput" /></div>
+        </div>
+        <div class="row">
+            <div class="col-2">Message</div>
+            <div class="col-4"><input type="text" id="messageInput" /></div>
+        </div>
+        <div class="row">&nbsp;</div>
+        <div class="row">
+            <div class="col-6">
+                <input type="button" id="sendButton" value="Send Message" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <hr />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <ul id="messagesList"></ul>
+        </div>
+    </div>*@
+
