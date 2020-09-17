@@ -8,10 +8,12 @@ const DataAccess = (function () {
 		});
     }
 
+    //#region Server messages
     const receiveServerHostMessage = (connection) => {
         connection.on("SendServerHostMessage", function (id, name, room) {
             console.log("Server gave permission to create a room");
             SonusModule.loadRoomHost(id, name, room)
+            SonusUI.GenerateList()
         });
     }
     
@@ -19,6 +21,7 @@ const DataAccess = (function () {
         connection.on("SendServerClientMessage", function (id, name, room) {
             console.log("Server gave permission to join the room");
             SonusModule.loadRoomClient(id, name, room)
+            SonusUI.GenerateList()
         });
     }
 
@@ -29,19 +32,36 @@ const DataAccess = (function () {
         });
     }
 
+    const receiveServerSongAdded = (connection) => {
+        connection.on("SendServerSongAdded", function (songs) {
+            console.log("song update received");
+            SonusModule.loadSongs(songs)
+        });
+    }
+    //#endregion
+
+    //#region client messages
     const sendHost = (connection, RoomType, RoomOption) => {
+        console.log("Asking server to create room.");
         connection.invoke("SendHostMessage", RoomType, RoomOption).catch(function (err) {
-            console.log("Asking server to create room.");
             return console.error(err.toString());
         });
     }
     
     const sendJoin = (connection, RoomType, RoomOption, RoomCode, Name) => {
+        console.log("Asking server to join room.");
         connection.invoke("SendJoinMessage", RoomType, RoomOption, RoomCode, Name).catch(function (err) {
-            console.log("Asking server to join room.");
             return console.error(err.toString());
         });
     }
+
+    const queueSong = (connection, RoomCode) => {
+        console.log("Generating song from server...");
+        connection.invoke("SendAddSongMessage", RoomCode).catch(function (err) {
+            return console.error(err.toString());
+        });
+    }
+    //#endregion
 
 return {
     startConnection:startConnection,
@@ -49,6 +69,8 @@ return {
     sendJoin:sendJoin,
     receiveServerHostMessage:receiveServerHostMessage,
     receiveServerClientMessage:receiveServerClientMessage,
-    receiveServerNewParticipantMessage:receiveServerNewParticipantMessage
+    receiveServerNewParticipantMessage:receiveServerNewParticipantMessage,
+    queueSong:queueSong,
+    receiveServerSongAdded:receiveServerSongAdded
 };
 })();

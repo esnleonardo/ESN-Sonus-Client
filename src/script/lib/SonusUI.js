@@ -12,6 +12,7 @@ const SonusUI = (function () {
         connection = SignalRConnection
     }
     
+    //#region open pages
     const OpenIndex = () => {
         SonusModule.loadIndex(Container)
     }
@@ -57,7 +58,9 @@ const SonusUI = (function () {
             DataAccess.sendHost(connection, RoomType, RoomOption)
         })
     }
+    //#endregion
     
+    //#region appending data
     const appendHost = function(host){
         Container.innerHTML = ""
         try {Container.append(host)} catch (error) {}
@@ -68,10 +71,25 @@ const SonusUI = (function () {
         try {Container.append(client)} catch (error) {}
     }
 
+    const appendSong = (song) => {        
+        let Queueholder = document.querySelector(".js-queue-holder");
+        try {Queueholder.append(song)} catch (error) {}
+    }
+    //#endregion
+
     const UpdateData = (room) => {
         let amount = document.querySelector(".js-amount");
         amount.textContent = `This room has ${room.participants.length} people in it.`
     }
+    
+
+    const GenerateList = () => {
+        generator = document.querySelector(".js-test")
+        generator.addEventListener("click", () => {
+            roomcode = document.querySelector(".js-room-code-text").textContent
+            DataAccess.queueSong(connection, roomcode)
+        })
+    } 
 
     return {
         AppSetup: AppSetup,
@@ -82,6 +100,8 @@ const SonusUI = (function () {
         OpenJoin:OpenJoin,
         appendHost:appendHost,
         appendClient:appendClient,
-        UpdateData:UpdateData
+        UpdateData:UpdateData,
+        GenerateList:GenerateList,
+        appendSong:appendSong
     };
 })();

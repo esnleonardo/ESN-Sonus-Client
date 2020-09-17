@@ -110,12 +110,28 @@ const SonusModule = (function(){
         SonusUI.appendClient(client.generateDOMNode());      
     }
 
+    const loadSongs = (songs) => {
+        let Queueholder = document.querySelector(".js-queue-holder");
+        Queueholder.innerHTML = ""
+        let i = 1
+        songs.forEach(element => {
+            let title = element.title
+            let singer = element.singer
+            let requester = element.requester
+            let time = element.time
+            let song = new Song({title, singer, requester, time});
+            SonusUI.appendSong(song.generateDOMNode(i));  
+            i++
+        });
+    }
+
     return{
         loadIndex:loadIndex,
         loadRoomOptionSelection:loadRoomOptionSelection,
         loadRoomHost:loadRoomHost,
         loadRoomClient:loadRoomClient,
-        loadRoomInput:loadRoomInput
+        loadRoomInput:loadRoomInput,
+        loadSongs:loadSongs
 
     }
 })();

@@ -1,13 +1,30 @@
 .c-song-search{
-
+    padding: 24px;
+    transform: skewX(-12deg);
+    width: 44%;
 }
 
 .c-song-search__search{
-
 }
 
 .c-song-search__list{
+    transform: skewX(12deg);
+}
 
+.c-song-search__input{
+    border-radius: 48px;
+    width: 50%;
+    height: 24px;
+    transform: skewX(12deg);
+}
+
+.c-song-search__input:hover{
+    border: 1px solid var(--color-esn-orange);
+}
+
+input.c-song-search__input[type="text"]:focus{
+    
+    border: 1px solid var(--color-esn-orange);
 }
 
 .c-song-search__holder{

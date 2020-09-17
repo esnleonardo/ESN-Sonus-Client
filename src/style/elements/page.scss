@@ -12,6 +12,10 @@ body {
 	color: var(--color-font-light);
 }
 
+:focus {
+    outline: none;
+}
+
 body {
     margin: 0;
 }

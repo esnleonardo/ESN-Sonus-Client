@@ -7,7 +7,7 @@
     background-color: var(--color-alpha-x);
     width: 100vw;
     height: 100vh;
-    padding: 24px;
+    padding: var(--margin-medium);
     box-sizing: border-box;
 }
 
@@ -39,7 +39,7 @@
     z-index: 1;
     width: 70%;
     transition: 250ms;
-    box-shadow: -20px 0 24px 24px black;
+    box-shadow: -20px 0 var(--margin-medium) var(--margin-medium) black;
 }
 
 .c-type-selection__playlist {
@@ -70,7 +70,7 @@
 .c-type-selection__playlist:hover {
     width: 70%;
     transition: 250ms;
-    box-shadow: 20px 0 24px 24px black;
+    box-shadow: 20px 0 var(--margin-medium) var(--margin-medium) black;
 }
 
 .c-type-selection__item-text--karaoke {

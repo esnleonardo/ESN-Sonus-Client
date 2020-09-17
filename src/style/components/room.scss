@@ -13,26 +13,26 @@
 }
 
 .c-video__title{
-    font-size: 24px;
+    font-size: var(--margin-medium);
     line-height: 28px;
     color: var(--color-font-esn-orange);
     margin-top: 16px;
 }
 
 .c-video__creator{
-    font-size: 24px;
+    font-size: var(--margin-medium);
     line-height: 28px;
     color: var(--color-font-light-x);
 }
 
 .c-video__requester{
-    font-size: 24px;
+    font-size: var(--margin-medium);
     line-height: 28px;
     color: var(--color-font-light-x);
 }
 
 .c-room-options__roomcode{
-    font-size: 24px;
+    font-size: var(--margin-medium);
     line-height: 28px;
     color: var(--color-font-light);
 }
@@ -48,4 +48,8 @@
 .c-listing-container{
     position: fixed;
     top: 0;
+    height: 100%;
+    right: 0;
+    width: 52%;
+    display: flex;
 }
