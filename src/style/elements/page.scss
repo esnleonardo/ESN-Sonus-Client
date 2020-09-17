@@ -3,13 +3,13 @@ body {
     font: $font-size/1.5 $font-stack;
     font-family: "KelsonSans", sans-serif;
     line-height: $line-height;
-	background: var(--alpha-background);
+	background: var(--color-alpha-x);
     -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-    background: var(--alpha-color);
-	color: var(--alpha-background);
+    background: var(--color-esn-pink);
+	color: var(--color-font-light);
 }
 
 body {

@@ -9,7 +9,12 @@
 @import './components/header.scss';
 @import './components/footer.scss';
 @import './components/typeSelection.scss';
+@import './components/room.scss';
+@import './components/search.scss';
+@import './components/queue.scss';
 
 
 @import './MediaQueries/mediaquery.scss';
 @import './MediaQueries/printstyles.scss';
+
+@import './utilities/color.scss'

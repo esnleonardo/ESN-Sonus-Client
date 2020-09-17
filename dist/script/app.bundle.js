@@ -8,38 +8,131 @@ const DataAccess = (function () {
 		});
     }
 
-    const sendHost = (connection, RoomType, RoomOption) => {
-        connection.invoke("SendHostMessage", RoomType, RoomOption).catch(function (err) {
-            return console.error(err.toString());
+    const receiveServerHostMessage = (connection) => {
+        connection.on("SendServerHostMessage", function (id, name, room) {
+            console.log("Server gave permission to create a room");
+            SonusModule.loadRoomHost(id, name, room)
+        });
+    }
+    
+    const receiveServerClientMessage = (connection) => {
+        connection.on("SendServerClientMessage", function (id, name, room) {
+            console.log("Server gave permission to join the room");
+            SonusModule.loadRoomClient(id, name, room)
         });
     }
 
-    const sendJoin = (connection, RoomType, RoomOption, RoomCode, Name) => {
-        connection.invoke("SendJoinMessage", RoomType, RoomOption, RoomCode, Name).catch(function (err) {
+    const receiveServerNewParticipantMessage = (connection) => {
+        connection.on("SendServerNotifyNewParticipant", function (room) {
+            console.log("update received");
+            SonusUI.UpdateData(room);
+        });
+    }
+
+    const sendHost = (connection, RoomType, RoomOption) => {
+        connection.invoke("SendHostMessage", RoomType, RoomOption).catch(function (err) {
+            console.log("Asking server to create room.");
             return console.error(err.toString());
         });
     }
     
-    // connection.on("ReceiveMessage", function (user, message) {
-    //     var msg = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    //     var encodedMsg = user + " says " + msg;
-    //     var li = document.createElement("li");
-    //     li.textContent = encodedMsg;
-    //     document.getElementById("messagesList").appendChild(li);
-    // });
-    // connection.start().then(function () {
-    //     document.getElementById("sendButton").disabled = false;
-    // }).catch(function (err) {
-    //     return console.error(err.toString());
-    // });
-    
+    const sendJoin = (connection, RoomType, RoomOption, RoomCode, Name) => {
+        connection.invoke("SendJoinMessage", RoomType, RoomOption, RoomCode, Name).catch(function (err) {
+            console.log("Asking server to join room.");
+            return console.error(err.toString());
+        });
+    }
 
 return {
     startConnection:startConnection,
     sendHost:sendHost,
-    sendJoin:sendJoin
+    sendJoin:sendJoin,
+    receiveServerHostMessage:receiveServerHostMessage,
+    receiveServerClientMessage:receiveServerClientMessage,
+    receiveServerNewParticipantMessage:receiveServerNewParticipantMessage
 };
 })();
+class Host{
+    constructor({id, name, participants, roomCode, roomOption, roomType, songs }){
+        Object.assign(this,{id, name, participants, roomCode, roomOption, roomType, songs});
+    }
+    generateDOMNode(){
+        this.songs = {
+            Title: "JaJa DingDong",
+            Singer: "Eurovision Song Festival",
+            Requester: "Bram Robyn",
+            Time:"5:0",
+        }
+        let container1 = document.createElement('div');
+        let container = document.createElement('div');
+        container.classList.add("c-karaoke__wrapper")
+        container.innerHTML = `
+            <div class="c-video-container">
+                <div>
+                    <div class="c-video"></div>
+                    <div class="c-video__title">${this.songs.Title}</div>
+                    <div class="c-video__creator">${this.songs.Singer}</div>
+                    <div class="c-video__requester">${this.songs.Requester}</div>
+                </div>
+                <div class="c-room-options">
+                    <p class="c-room-options__roomcode">Room Code: <span class="u-font-dark">${this.roomCode}</span></p>
+                    <p class="c-room-options__connectedusers"><span class="u-font-dark">${this.participants.length}</span> connected user(s)</p>
+                </div>
+            </div>
+        `
+        container1.appendChild(container)
+        container1.innerHTML += `
+            <div class="c-listing-container">
+                <div class="c-queue">
+                    <div class="c-queue-item">
+                        <div class="c-queue-item__info">
+                            <h1 class="c-queue-item__info--count">1</h1>
+                            <div class="c-queue-item__info-holder">
+                                <p class="c-queue-item__info-holder__title">JaJa Ding Dong</p>
+                                <p class="c-queue-item__info-holder__creator">Eurosong Festival</p>
+                            </div>
+                        </div>
+                        <div class="c-queue-item__division"></div>
+                        <p class="c-queue-item__requester">Bram Robyn</p>
+                </div>
+                </div>
+                <div class="c-song-search">
+                    <div class="c-song-search__search">
+                    </div>
+                    <div class="c-song-search__list">
+                        <div class="c-song-search__holder">
+                            <div class="c-song-search__holder-detail-container">
+                                <p class="c-song-search__holder-detail__item"></p>
+                                <p class="c-song-search__holder-detail__item"></p>
+                            </div>
+                            <div class="c-song-search__holder-image-container">
+                                <img src="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
+        return container1;
+    }
+}
+class Client{
+    constructor({id, name, participants, roomCode, roomOption, roomType, songs }){
+        Object.assign(this,{id, name, participants, roomCode, roomOption, roomType, songs});
+    }
+    
+    generateDOMNode(){
+        let container = document.createElement('div');
+        container.innerHTML = `
+            <h1>Welcome ${this.name}!</h1>
+            <h2>${this.roomType}</h2>
+            <h3 class="js-roomcode">${this.roomCode}</h3>
+            <p>${this.roomOption}</p>
+            <p class="js-amount">This room has ${this.participants.length} people in it.</p>
+        `
+        return container;
+    }
+}
 const SonusModule = (function(){
     
     const loadIndex = function(container){
@@ -124,24 +217,32 @@ const SonusModule = (function(){
                 <input type="text" id="Name" class="js-name"/>
             </div>
             <div class="form-group">
-                <label for="Title">Title:</label> 
-                <input type="text" id="Title" class="js-roomcode" />
+                <label for="RoomCode">Room Code:</label> 
+                <input type="text" id="RoomCode" class="js-roomcode" />
             </div>
             <input type="button" value="Search" class="searchButton js-joinroom" />
         </form>
         `
     }
 
-    const loadRoomHost = (container) => {
-        container.innerHTML = ``
+    const loadRoomHost = async (id, name, room) => {
+        let participants = room.participants
+        let roomCode = room.roomCode
+        let roomOption = room.roomOption
+        let roomType = room.roomType
+        let songs = room.songs
+        let host = new Host({id, name, participants, roomCode, roomOption, roomType, songs});
+        SonusUI.appendHost(host.generateDOMNode());        
     }
-    const loadRoomClient = (container, RoomType, RoomOption, RoomCode, Name) => {
-        container.innerHTML = `
-            <h1>${RoomType}</h1>
-            <h1>${RoomOption}</h1>
-            <h1>${RoomCode}</h1>
-            <h1>Welcome ${Name}!</h1>
-        `
+
+    const loadRoomClient = (id, name, room) => {
+        let participants = room.participants
+        let roomCode = room.roomCode
+        let roomOption = "join"
+        let roomType = room.roomType
+        let songs = room.songs
+        let client = new Client({id, name, participants, roomCode, roomOption, roomType, songs});
+        SonusUI.appendClient(client.generateDOMNode());      
     }
 
     return{
@@ -191,15 +292,6 @@ const SonusUI = (function () {
         })
     }
 
-    const OpenHost = () => {
-        let Host = document.querySelector(".js-host");
-        Host.addEventListener('click', () => {
-            RoomOption = "host"
-            SonusModule.loadRoomHost(Container)
-            DataAccess.sendHost(connection, RoomType, RoomOption)
-        })
-    }
-
     const OpenJoin = () => {
         let Join = document.querySelector(".js-join");
         Join.addEventListener('click', () => {
@@ -210,15 +302,32 @@ const SonusUI = (function () {
                 RoomCode = document.querySelector(".js-roomcode").value
                 Name = document.querySelector(".js-name").value
                 DataAccess.sendJoin(connection, RoomType, RoomOption, RoomCode, Name)
-                OpenRoom(RoomType, RoomOption, RoomCode, Name)
             })
         })
     }
     
-    const OpenRoom = (RoomType, RoomOption, RoomCode, Name) => {
-        SonusModule.loadRoomClient(Container, RoomType, RoomOption, RoomCode, Name)
+    const OpenHost = () => {
+        let Host = document.querySelector(".js-host");
+        Host.addEventListener('click', () => {
+            RoomOption = "host"
+            DataAccess.sendHost(connection, RoomType, RoomOption)
+        })
+    }
+    
+    const appendHost = function(host){
+        Container.innerHTML = ""
+        try {Container.append(host)} catch (error) {}
     }
 
+    const appendClient = function(client){
+        Container.innerHTML = ""
+        try {Container.append(client)} catch (error) {}
+    }
+
+    const UpdateData = (room) => {
+        let amount = document.querySelector(".js-amount");
+        amount.textContent = `This room has ${room.participants.length} people in it.`
+    }
 
     return {
         AppSetup: AppSetup,
@@ -227,14 +336,19 @@ const SonusUI = (function () {
         OpenKaraoke:OpenKaraoke,    
         OpenHost:OpenHost,
         OpenJoin:OpenJoin,
-        OpenRoom:OpenRoom,
+        appendHost:appendHost,
+        appendClient:appendClient,
+        UpdateData:UpdateData
     };
 })();
 (function() {
 
 	document.addEventListener('DOMContentLoaded', () => {
-		var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:44349/Sonus").build()
+		var connection = new signalR.HubConnectionBuilder().withUrl("http://esnsonus.be/Sonus").build()
 		DataAccess.startConnection(connection)
+		DataAccess.receiveServerHostMessage(connection)
+		DataAccess.receiveServerClientMessage(connection)
+		DataAccess.receiveServerNewParticipantMessage(connection)
 
 		SonusUI.AppSetup({
 			ContainerClass: '.js-container',
@@ -246,11 +360,6 @@ const SonusUI = (function () {
 		SonusUI.OpenIndex()
 		SonusUI.OpenPlaylist()
 		SonusUI.OpenKaraoke()
-		// SonusUI.OpenHost()
-		// SonusUI.OpenJoin()
-		// SonusUI.OpenRoom()
-
-		
 	});
 })();
 

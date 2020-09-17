@@ -36,15 +36,6 @@ const SonusUI = (function () {
         })
     }
 
-    const OpenHost = () => {
-        let Host = document.querySelector(".js-host");
-        Host.addEventListener('click', () => {
-            RoomOption = "host"
-            SonusModule.loadRoomHost(Container)
-            DataAccess.sendHost(connection, RoomType, RoomOption)
-        })
-    }
-
     const OpenJoin = () => {
         let Join = document.querySelector(".js-join");
         Join.addEventListener('click', () => {
@@ -55,15 +46,32 @@ const SonusUI = (function () {
                 RoomCode = document.querySelector(".js-roomcode").value
                 Name = document.querySelector(".js-name").value
                 DataAccess.sendJoin(connection, RoomType, RoomOption, RoomCode, Name)
-                OpenRoom(RoomType, RoomOption, RoomCode, Name)
             })
         })
     }
     
-    const OpenRoom = (RoomType, RoomOption, RoomCode, Name) => {
-        SonusModule.loadRoomClient(Container, RoomType, RoomOption, RoomCode, Name)
+    const OpenHost = () => {
+        let Host = document.querySelector(".js-host");
+        Host.addEventListener('click', () => {
+            RoomOption = "host"
+            DataAccess.sendHost(connection, RoomType, RoomOption)
+        })
+    }
+    
+    const appendHost = function(host){
+        Container.innerHTML = ""
+        try {Container.append(host)} catch (error) {}
     }
 
+    const appendClient = function(client){
+        Container.innerHTML = ""
+        try {Container.append(client)} catch (error) {}
+    }
+
+    const UpdateData = (room) => {
+        let amount = document.querySelector(".js-amount");
+        amount.textContent = `This room has ${room.participants.length} people in it.`
+    }
 
     return {
         AppSetup: AppSetup,
@@ -72,6 +80,8 @@ const SonusUI = (function () {
         OpenKaraoke:OpenKaraoke,    
         OpenHost:OpenHost,
         OpenJoin:OpenJoin,
-        OpenRoom:OpenRoom,
+        appendHost:appendHost,
+        appendClient:appendClient,
+        UpdateData:UpdateData
     };
 })();

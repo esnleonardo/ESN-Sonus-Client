@@ -1,0 +1,51 @@
+.c-video-container{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.c-video{
+    width: 920px;
+    height: 500px;
+    background: aliceblue;
+}
+
+.c-video__title{
+    font-size: 24px;
+    line-height: 28px;
+    color: var(--color-font-esn-orange);
+    margin-top: 16px;
+}
+
+.c-video__creator{
+    font-size: 24px;
+    line-height: 28px;
+    color: var(--color-font-light-x);
+}
+
+.c-video__requester{
+    font-size: 24px;
+    line-height: 28px;
+    color: var(--color-font-light-x);
+}
+
+.c-room-options__roomcode{
+    font-size: 24px;
+    line-height: 28px;
+    color: var(--color-font-light);
+}
+
+.c-room-options{
+
+}
+
+.c-room-options__connectedusers{
+
+}
+
+.c-listing-container{
+    position: fixed;
+    top: 0;
+}

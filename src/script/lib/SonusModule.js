@@ -82,24 +82,32 @@ const SonusModule = (function(){
                 <input type="text" id="Name" class="js-name"/>
             </div>
             <div class="form-group">
-                <label for="Title">Title:</label> 
-                <input type="text" id="Title" class="js-roomcode" />
+                <label for="RoomCode">Room Code:</label> 
+                <input type="text" id="RoomCode" class="js-roomcode" />
             </div>
             <input type="button" value="Search" class="searchButton js-joinroom" />
         </form>
         `
     }
 
-    const loadRoomHost = (container) => {
-        container.innerHTML = ``
+    const loadRoomHost = async (id, name, room) => {
+        let participants = room.participants
+        let roomCode = room.roomCode
+        let roomOption = room.roomOption
+        let roomType = room.roomType
+        let songs = room.songs
+        let host = new Host({id, name, participants, roomCode, roomOption, roomType, songs});
+        SonusUI.appendHost(host.generateDOMNode());        
     }
-    const loadRoomClient = (container, RoomType, RoomOption, RoomCode, Name) => {
-        container.innerHTML = `
-            <h1>${RoomType}</h1>
-            <h1>${RoomOption}</h1>
-            <h1>${RoomCode}</h1>
-            <h1>Welcome ${Name}!</h1>
-        `
+
+    const loadRoomClient = (id, name, room) => {
+        let participants = room.participants
+        let roomCode = room.roomCode
+        let roomOption = "join"
+        let roomType = room.roomType
+        let songs = room.songs
+        let client = new Client({id, name, participants, roomCode, roomOption, roomType, songs});
+        SonusUI.appendClient(client.generateDOMNode());      
     }
 
     return{
