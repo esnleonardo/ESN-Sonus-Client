@@ -11,17 +11,17 @@ const DataAccess = (function () {
     //#region Server messages
     const receiveServerHostMessage = (connection) => {
         connection.on("SendServerHostMessage", function (id, name, room) {
-            console.log("Server gave permission to create a room");
+            console.log("Server gave permission to create a room.");
             SonusModule.loadRoomHost(id, name, room)
-            SonusUI.GenerateList()
+            SonusModule.searchSongs()
         });
     }
     
     const receiveServerClientMessage = (connection) => {
         connection.on("SendServerClientMessage", function (id, name, room) {
-            console.log("Server gave permission to join the room");
+            console.log("Server gave permission to join the room.");
             SonusModule.loadRoomClient(id, name, room)
-            SonusUI.GenerateList()
+            SonusModule.searchSongs()
         });
     }
 
@@ -42,37 +42,80 @@ const DataAccess = (function () {
 
     //#region client messages
     const sendHost = (connection, RoomType, RoomOption) => {
-        console.log("Asking server to create room.");
+        console.log("Asking server to create room...");
         connection.invoke("SendHostMessage", RoomType, RoomOption).catch(function (err) {
             return console.error(err.toString());
         });
     }
     
     const sendJoin = (connection, RoomType, RoomOption, RoomCode, Name) => {
-        console.log("Asking server to join room.");
+        console.log("Asking server to join room...");
         connection.invoke("SendJoinMessage", RoomType, RoomOption, RoomCode, Name).catch(function (err) {
             return console.error(err.toString());
         });
     }
 
-    const queueSong = (connection, RoomCode) => {
-        console.log("Generating song from server...");
-        connection.invoke("SendAddSongMessage", RoomCode).catch(function (err) {
+    const queueSong = (connection, RoomCode, id, title, creator) => {
+        console.log("Making song handshake with the server...");
+        connection.invoke("SendAddSongMessage", RoomCode, id, title, creator).catch(function (err) {
+            return console.error(err.toString());
+        });
+    }
+
+    const songEnded = (connection) => {
+        console.log("Telling Server the song has ended...");
+        connection.invoke("SendSongEndedMessage").catch(function (err) {
             return console.error(err.toString());
         });
     }
     //#endregion
 
-return {
-    startConnection:startConnection,
-    sendHost:sendHost,
-    sendJoin:sendJoin,
-    receiveServerHostMessage:receiveServerHostMessage,
-    receiveServerClientMessage:receiveServerClientMessage,
-    receiveServerNewParticipantMessage:receiveServerNewParticipantMessage,
-    queueSong:queueSong,
-    receiveServerSongAdded:receiveServerSongAdded
-};
+    const key = "AIzaSyAbF8ecZ0TzrbSMQoAGXNW4yNQ5FeXIf6o"
+    // https://www.googleapis.com/youtube/v3/search?type=video?videoEmbeddable=true?videoDimension=2d?maxResults=10?q=metallica&key=AIzaSyBXem9njEU44T-3WPd5y9vKdv6y_K6FZgg
+    const baseurl = ` https://www.googleapis.com/youtube/v3/search?type=video&videoEmbeddable=true&videoDimension=2d&part=snippet&maxResults=9&q=`
+    const searchSongs = () => {
+        let inputfield = document.querySelector(".c-song-search__input")
+        inputfield.addEventListener("keyup", (e) => {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                let Songholder = document.querySelector(".c-song-search__holder");
+                Songholder.innerHTML = ""
+                fetch(baseurl + e.target.value + "karaoke" + `&key=${key}`, {
+                    contentType: "application/json",
+                    authorization: "AIzaSyAbF8ecZ0TzrbSMQoAGXNW4yNQ5FeXIf6o",
+                    accept: "application/json"
+                    
+                })
+                .then(
+                    (response) => {
+                        if (response.status !== 200) {
+                            // console.log(baseurl + e.target.value + `&key=${key}`);
+                            console.log('Looks like there was a problem. Status Code: ' +response);
+                            return;
+                        }
+                        
+                        response.json().then((data) => {
+                            // console.log(data);
+                            SonusModule.loadSearchedSongs(data.items)
+                        });
+                    }
+                )
+                .catch(function(err) {console.log('Fetch Error :-S', err);});
+            }
+        })
+    }
+
+    return {
+        startConnection:startConnection,
+        sendHost:sendHost,
+        sendJoin:sendJoin,
+        receiveServerHostMessage:receiveServerHostMessage,
+        receiveServerClientMessage:receiveServerClientMessage,
+        receiveServerNewParticipantMessage:receiveServerNewParticipantMessage,
+        queueSong:queueSong,
+        receiveServerSongAdded:receiveServerSongAdded,
+        searchSongs:searchSongs,
+        songEnded:songEnded
+    };
 })();
 class Host{
     constructor({id, name, participants, roomCode, roomOption, roomType, songs }){
@@ -91,7 +134,9 @@ class Host{
         container.innerHTML = `
             <div class="c-video-container">
                 <div>
-                    <div class="c-video"></div>
+                    <div class="c-video">
+                        <div id="player"></div>
+                    </div>
                     <div class="c-video__title">${this.songs.Title} <span class="u-font-light-x">- ${this.songs.Singer}</span></div>
                     <div class="c-video__requester">${this.songs.Requester}</div>
                 </div>
@@ -107,38 +152,14 @@ class Host{
             <div class="c-listing-container">
                 <div class="c-queue js-queue-holder">
 
-
-
-
-                    <div class="c-queue-item">
-                        <div class="c-queue-item__info">
-                            <h1 class="c-queue-item__info--count u-font-dark">1</h1>
-                            <div class="c-queue-item__info-holder">
-                                <p class="c-queue-item__info-holder__title">JaJa Ding Dong</p>
-                                <p class="c-queue-item__info-holder__creator u-font-light">Eurosong Festival</p>
-                            </div>
-                        </div>
-                        <div class="c-queue-item__division"></div>
-                        <p class="c-queue-item__requester">Bram Robyn</p>
-                    </div>
-
-
-                    
                 </div>
                 <div class="c-song-search">
                     <div class="c-song-search__search">
                         <input class="c-song-search__input" type="text"/>
-                        </div>
-                        <button class="js-test">Generate</button>
-                        <div class="c-song-search__list">
+                    </div>
+                    <div class="c-song-search__list">
                         <div class="c-song-search__holder">
-                            <div class="c-song-search__holder-detail-container">
-                                <p class="c-song-search__holder-detail__item"></p>
-                                <p class="c-song-search__holder-detail__item"></p>
-                            </div>
-                            <div class="c-song-search__holder-image-container">
-                                <img src="">
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -165,7 +186,9 @@ class Client{
         container.innerHTML = `
             <div class="c-video-container">
                 <div>
-                    <div class="c-video"></div>
+                    <div class="c-video">
+                        <div id="player"></div>
+                    </div>
                     <div class="c-video__title">${this.songs.Title} <span class="u-font-light-x">- ${this.songs.Singer}</span></div>
                     <div class="c-video__requester">${this.songs.Requester}</div>
                 </div>
@@ -180,39 +203,15 @@ class Client{
         container1.innerHTML += `
             <div class="c-listing-container">
                 <div class="c-queue js-queue-holder">
-
-
-
-
-                    <div class="c-queue-item">
-                        <div class="c-queue-item__info">
-                            <h1 class="c-queue-item__info--count u-font-dark">1</h1>
-                            <div class="c-queue-item__info-holder">
-                                <p class="c-queue-item__info-holder__title">JaJa Ding Dong</p>
-                                <p class="c-queue-item__info-holder__creator u-font-light">Eurosong Festival</p>
-                            </div>
-                        </div>
-                        <div class="c-queue-item__division"></div>
-                        <p class="c-queue-item__requester">Bram Robyn</p>
-                    </div>
-
-
-                    
+   
                 </div>
                 <div class="c-song-search">
                     <div class="c-song-search__search">
                         <input class="c-song-search__input" type="text"/>
-                        </div>
-                        <button class="js-test">Generate</button>
-                        <div class="c-song-search__list">
+                    </div>
+                    <div class="c-song-search__list">
                         <div class="c-song-search__holder">
-                            <div class="c-song-search__holder-detail-container">
-                                <p class="c-song-search__holder-detail__item"></p>
-                                <p class="c-song-search__holder-detail__item"></p>
-                            </div>
-                            <div class="c-song-search__holder-image-container">
-                                <img src="">
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -245,8 +244,63 @@ class Song{
         return container;
     }
 }
-const SonusModule = (function(){
+
+class YTSong{
+    constructor({id, creator, title, thumbnail}){
+        Object.assign(this,{id, creator, title, thumbnail});
+    }
     
+    generateDOMNode(key){
+        let container = document.createElement('div');
+        container.classList.add("c-song-search__holder-container")
+        container.setAttribute("id", this.id)
+        container.innerHTML = `
+            <div class="c-song-search__holder-detail-container">
+                <p class="c-song-search__holder-detail__item u-font-light-x">${this.title}</p>
+                <p class="c-song-search__holder-detail__item u-font-light">${this.creator}</p>
+            </div>                                
+            <div class="c-song-search__holder-image-container">
+                <img src="${this.thumbnail}">
+            </div>
+        `
+        container.addEventListener("click", (e) => {
+            let id = ""
+            let creator = ""
+            let title = ""
+            if(e.target.localName === "p"){
+                if(!e.target.classList.contains("u-font-light-x")){
+                    creator = e.target.textContent
+                    title = e.target.previousElementSibling.textContent
+                    id = e.target.parentNode.parentNode.id
+                }
+                else{
+                    creator = e.target.nextElementSibling.textContent
+                    title = e.target.textContent
+                    id = e.target.parentNode.parentNode.id
+                }
+            }
+
+            if(e.target.localName === "div"){
+                id = e.target.id
+                creator = e.target.children[0].lastElementChild.textContent
+                title = e.target.children[0].firstElementChild.textContent
+            }
+
+            if(e.target.localName === "img"){
+                id = e.target.parentNode.parentNode.id
+                creator = e.target.parentNode.parentNode.children[0].lastElementChild.textContent
+                title = e.target.parentNode.parentNode.children[0].firstElementChild.textContent
+            }
+            SonusUI.onVideoClick(id, title, creator)
+        })
+        return container;
+    }
+}
+const SonusModule = (function(){
+    let player;
+    let queueIdList = ""
+
+    //#region pages
     const loadIndex = function(container){
         container.innerHTML = `
         <header>
@@ -336,7 +390,9 @@ const SonusModule = (function(){
         </form>
         `
     }
+    //#endregion
 
+    //#region loading classes and appending data
     const loadRoomHost = async (id, name, room) => {
         let participants = room.participants
         let roomCode = room.roomCode
@@ -344,7 +400,23 @@ const SonusModule = (function(){
         let roomType = room.roomType
         let songs = room.songs
         let host = new Host({id, name, participants, roomCode, roomOption, roomType, songs});
-        SonusUI.appendHost(host.generateDOMNode());        
+        SonusUI.appendHost(host.generateDOMNode());       
+        
+        YT.ready(function(){
+			player = new YT.Player('player', {
+                width: 920,
+                height: 500,
+                videoId: 'Xa0Q0J5tOP0',
+                playerVars: {
+                    color: 'white',
+                    playlist: queueIdList
+                },
+                events: {
+                    onReady: initialize,
+                    onStateChange: onPlayerStateChange      
+                }
+            });
+        });
     }
 
     const loadRoomClient = (id, name, room) => {
@@ -354,7 +426,23 @@ const SonusModule = (function(){
         let roomType = room.roomType
         let songs = room.songs
         let client = new Client({id, name, participants, roomCode, roomOption, roomType, songs});
-        SonusUI.appendClient(client.generateDOMNode());      
+        SonusUI.appendClient(client.generateDOMNode());   
+
+        YT.ready(function(){
+			player = new YT.Player('player', {
+                width: 920,
+                height: 500,
+                videoId: 'Xa0Q0J5tOP0',
+                playerVars: {
+                    color: 'white',
+                    playlist: queueIdList
+                },
+                events: {
+                    onReady: initialize,
+                    onStateChange: onPlayerStateChange            
+                }
+           });
+        })
     }
 
     const loadSongs = (songs) => {
@@ -366,20 +454,49 @@ const SonusModule = (function(){
             let singer = element.singer
             let requester = element.requester
             let time = element.time
+            let id = element.songId
             let song = new Song({title, singer, requester, time});
+            queueIdList += `${id},`
             SonusUI.appendSong(song.generateDOMNode(i));  
             i++
         });
     }
 
+    const loadSearchedSongs = (data) => {
+        let i = 1
+        data.forEach(element => {
+            let id= element.id.videoId;
+            let creator= element.snippet.channelTitle;
+            let title= element.snippet.title;
+            let thumbnail= element.snippet.thumbnails.default.url;
+            let searchedSong = new YTSong({id, creator, title, thumbnail});
+            SonusUI.appendSearchedSong(searchedSong.generateDOMNode(i));  
+            i++
+        })
+    }
+    //#endregion
+
+    // #region youtube player 
+    const initialize = (event) => {
+        event.target.playVideo();
+    }
+
+    const onPlayerStateChange = (event) => {
+        if(event.data == 0){
+            console.log("done");
+            SonusUI.songEnded()
+        }
+    }
+    //#endregion
+    
     return{
         loadIndex:loadIndex,
         loadRoomOptionSelection:loadRoomOptionSelection,
         loadRoomHost:loadRoomHost,
         loadRoomClient:loadRoomClient,
         loadRoomInput:loadRoomInput,
-        loadSongs:loadSongs
-
+        loadSongs:loadSongs,
+        loadSearchedSongs:loadSearchedSongs,
     }
 })();
 //Hoofdmodule
@@ -459,21 +576,26 @@ const SonusUI = (function () {
         let Queueholder = document.querySelector(".js-queue-holder");
         try {Queueholder.append(song)} catch (error) {}
     }
+
+    const appendSearchedSong = (song) => {        
+        let Songholder = document.querySelector(".c-song-search__holder");
+        try {Songholder.append(song)} catch (error) {}
+    }
     //#endregion
 
     const UpdateData = (room) => {
         let amount = document.querySelector(".js-amount");
         amount.textContent = `This room has ${room.participants.length} people in it.`
     }
-    
 
-    const GenerateList = () => {
-        generator = document.querySelector(".js-test")
-        generator.addEventListener("click", () => {
-            roomcode = document.querySelector(".js-room-code-text").textContent
-            DataAccess.queueSong(connection, roomcode)
-        })
-    } 
+    const onVideoClick = (id, title, creator) => {
+        let roomcode = document.querySelector(".js-room-code-text").textContent
+        DataAccess.queueSong(connection, roomcode, id, title, creator)
+    }
+
+    const songEnded = () =>{
+        DataAccess.songEnded(connection)
+    }
 
     return {
         AppSetup: AppSetup,
@@ -485,12 +607,13 @@ const SonusUI = (function () {
         appendHost:appendHost,
         appendClient:appendClient,
         UpdateData:UpdateData,
-        GenerateList:GenerateList,
-        appendSong:appendSong
+        appendSong:appendSong,
+        appendSearchedSong:appendSearchedSong,
+        onVideoClick:onVideoClick,
+        songEnded:songEnded
     };
 })();
-(function() {
-
+(function () {
 	document.addEventListener('DOMContentLoaded', () => {
 		var connection = new signalR.HubConnectionBuilder().withUrl("http://esnsonus.be/Sonus").build()
 		// var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:44349/Sonus").build()
@@ -505,11 +628,16 @@ const SonusUI = (function () {
 			PlaylistClass: '.js-playlist',
 			KaraokeClass: '.js-karaoke',
 			SignalRConnection: connection
-        });
+		});
 
 		SonusUI.OpenIndex()
 		SonusUI.OpenPlaylist()
 		SonusUI.OpenKaraoke()
+
+		//send time of the song to client upon joining, so the videos are playing in sync
+		//on the end of a song, send message to server to remove song from queue in the room
+		//when user disconenctes, remove them from the room
+		//when host disconnects, remove session
 	});
 })();
 

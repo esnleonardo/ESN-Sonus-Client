@@ -1,5 +1,8 @@
 const SonusModule = (function(){
-    
+    let player;
+    let queueIdList = ""
+
+    //#region pages
     const loadIndex = function(container){
         container.innerHTML = `
         <header>
@@ -89,7 +92,9 @@ const SonusModule = (function(){
         </form>
         `
     }
+    //#endregion
 
+    //#region loading classes and appending data
     const loadRoomHost = async (id, name, room) => {
         let participants = room.participants
         let roomCode = room.roomCode
@@ -97,7 +102,23 @@ const SonusModule = (function(){
         let roomType = room.roomType
         let songs = room.songs
         let host = new Host({id, name, participants, roomCode, roomOption, roomType, songs});
-        SonusUI.appendHost(host.generateDOMNode());        
+        SonusUI.appendHost(host.generateDOMNode());       
+        
+        YT.ready(function(){
+			player = new YT.Player('player', {
+                width: 920,
+                height: 500,
+                videoId: 'Xa0Q0J5tOP0',
+                playerVars: {
+                    color: 'white',
+                    playlist: queueIdList
+                },
+                events: {
+                    onReady: initialize,
+                    onStateChange: onPlayerStateChange      
+                }
+            });
+        });
     }
 
     const loadRoomClient = (id, name, room) => {
@@ -107,7 +128,23 @@ const SonusModule = (function(){
         let roomType = room.roomType
         let songs = room.songs
         let client = new Client({id, name, participants, roomCode, roomOption, roomType, songs});
-        SonusUI.appendClient(client.generateDOMNode());      
+        SonusUI.appendClient(client.generateDOMNode());   
+
+        YT.ready(function(){
+			player = new YT.Player('player', {
+                width: 920,
+                height: 500,
+                videoId: 'Xa0Q0J5tOP0',
+                playerVars: {
+                    color: 'white',
+                    playlist: queueIdList
+                },
+                events: {
+                    onReady: initialize,
+                    onStateChange: onPlayerStateChange            
+                }
+           });
+        })
     }
 
     const loadSongs = (songs) => {
@@ -119,19 +156,48 @@ const SonusModule = (function(){
             let singer = element.singer
             let requester = element.requester
             let time = element.time
+            let id = element.songId
             let song = new Song({title, singer, requester, time});
+            queueIdList += `${id},`
             SonusUI.appendSong(song.generateDOMNode(i));  
             i++
         });
     }
 
+    const loadSearchedSongs = (data) => {
+        let i = 1
+        data.forEach(element => {
+            let id= element.id.videoId;
+            let creator= element.snippet.channelTitle;
+            let title= element.snippet.title;
+            let thumbnail= element.snippet.thumbnails.default.url;
+            let searchedSong = new YTSong({id, creator, title, thumbnail});
+            SonusUI.appendSearchedSong(searchedSong.generateDOMNode(i));  
+            i++
+        })
+    }
+    //#endregion
+
+    // #region youtube player 
+    const initialize = (event) => {
+        event.target.playVideo();
+    }
+
+    const onPlayerStateChange = (event) => {
+        if(event.data == 0){
+            console.log("done");
+            SonusUI.songEnded()
+        }
+    }
+    //#endregion
+    
     return{
         loadIndex:loadIndex,
         loadRoomOptionSelection:loadRoomOptionSelection,
         loadRoomHost:loadRoomHost,
         loadRoomClient:loadRoomClient,
         loadRoomInput:loadRoomInput,
-        loadSongs:loadSongs
-
+        loadSongs:loadSongs,
+        loadSearchedSongs:loadSearchedSongs,
     }
 })();

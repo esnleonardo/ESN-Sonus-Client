@@ -15,7 +15,9 @@ class Host{
         container.innerHTML = `
             <div class="c-video-container">
                 <div>
-                    <div class="c-video"></div>
+                    <div class="c-video">
+                        <div id="player"></div>
+                    </div>
                     <div class="c-video__title">${this.songs.Title} <span class="u-font-light-x">- ${this.songs.Singer}</span></div>
                     <div class="c-video__requester">${this.songs.Requester}</div>
                 </div>
@@ -31,38 +33,14 @@ class Host{
             <div class="c-listing-container">
                 <div class="c-queue js-queue-holder">
 
-
-
-
-                    <div class="c-queue-item">
-                        <div class="c-queue-item__info">
-                            <h1 class="c-queue-item__info--count u-font-dark">1</h1>
-                            <div class="c-queue-item__info-holder">
-                                <p class="c-queue-item__info-holder__title">JaJa Ding Dong</p>
-                                <p class="c-queue-item__info-holder__creator u-font-light">Eurosong Festival</p>
-                            </div>
-                        </div>
-                        <div class="c-queue-item__division"></div>
-                        <p class="c-queue-item__requester">Bram Robyn</p>
-                    </div>
-
-
-                    
                 </div>
                 <div class="c-song-search">
                     <div class="c-song-search__search">
                         <input class="c-song-search__input" type="text"/>
-                        </div>
-                        <button class="js-test">Generate</button>
-                        <div class="c-song-search__list">
+                    </div>
+                    <div class="c-song-search__list">
                         <div class="c-song-search__holder">
-                            <div class="c-song-search__holder-detail-container">
-                                <p class="c-song-search__holder-detail__item"></p>
-                                <p class="c-song-search__holder-detail__item"></p>
-                            </div>
-                            <div class="c-song-search__holder-image-container">
-                                <img src="">
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -89,7 +67,9 @@ class Client{
         container.innerHTML = `
             <div class="c-video-container">
                 <div>
-                    <div class="c-video"></div>
+                    <div class="c-video">
+                        <div id="player"></div>
+                    </div>
                     <div class="c-video__title">${this.songs.Title} <span class="u-font-light-x">- ${this.songs.Singer}</span></div>
                     <div class="c-video__requester">${this.songs.Requester}</div>
                 </div>
@@ -104,39 +84,15 @@ class Client{
         container1.innerHTML += `
             <div class="c-listing-container">
                 <div class="c-queue js-queue-holder">
-
-
-
-
-                    <div class="c-queue-item">
-                        <div class="c-queue-item__info">
-                            <h1 class="c-queue-item__info--count u-font-dark">1</h1>
-                            <div class="c-queue-item__info-holder">
-                                <p class="c-queue-item__info-holder__title">JaJa Ding Dong</p>
-                                <p class="c-queue-item__info-holder__creator u-font-light">Eurosong Festival</p>
-                            </div>
-                        </div>
-                        <div class="c-queue-item__division"></div>
-                        <p class="c-queue-item__requester">Bram Robyn</p>
-                    </div>
-
-
-                    
+   
                 </div>
                 <div class="c-song-search">
                     <div class="c-song-search__search">
                         <input class="c-song-search__input" type="text"/>
-                        </div>
-                        <button class="js-test">Generate</button>
-                        <div class="c-song-search__list">
+                    </div>
+                    <div class="c-song-search__list">
                         <div class="c-song-search__holder">
-                            <div class="c-song-search__holder-detail-container">
-                                <p class="c-song-search__holder-detail__item"></p>
-                                <p class="c-song-search__holder-detail__item"></p>
-                            </div>
-                            <div class="c-song-search__holder-image-container">
-                                <img src="">
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -166,6 +122,58 @@ class Song{
             <p class="c-queue-item__requester">${this.requester}</p>
         
         `
+        return container;
+    }
+}
+
+class YTSong{
+    constructor({id, creator, title, thumbnail}){
+        Object.assign(this,{id, creator, title, thumbnail});
+    }
+    
+    generateDOMNode(key){
+        let container = document.createElement('div');
+        container.classList.add("c-song-search__holder-container")
+        container.setAttribute("id", this.id)
+        container.innerHTML = `
+            <div class="c-song-search__holder-detail-container">
+                <p class="c-song-search__holder-detail__item u-font-light-x">${this.title}</p>
+                <p class="c-song-search__holder-detail__item u-font-light">${this.creator}</p>
+            </div>                                
+            <div class="c-song-search__holder-image-container">
+                <img src="${this.thumbnail}">
+            </div>
+        `
+        container.addEventListener("click", (e) => {
+            let id = ""
+            let creator = ""
+            let title = ""
+            if(e.target.localName === "p"){
+                if(!e.target.classList.contains("u-font-light-x")){
+                    creator = e.target.textContent
+                    title = e.target.previousElementSibling.textContent
+                    id = e.target.parentNode.parentNode.id
+                }
+                else{
+                    creator = e.target.nextElementSibling.textContent
+                    title = e.target.textContent
+                    id = e.target.parentNode.parentNode.id
+                }
+            }
+
+            if(e.target.localName === "div"){
+                id = e.target.id
+                creator = e.target.children[0].lastElementChild.textContent
+                title = e.target.children[0].firstElementChild.textContent
+            }
+
+            if(e.target.localName === "img"){
+                id = e.target.parentNode.parentNode.id
+                creator = e.target.parentNode.parentNode.children[0].lastElementChild.textContent
+                title = e.target.parentNode.parentNode.children[0].firstElementChild.textContent
+            }
+            SonusUI.onVideoClick(id, title, creator)
+        })
         return container;
     }
 }

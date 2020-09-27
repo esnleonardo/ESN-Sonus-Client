@@ -75,21 +75,26 @@ const SonusUI = (function () {
         let Queueholder = document.querySelector(".js-queue-holder");
         try {Queueholder.append(song)} catch (error) {}
     }
+
+    const appendSearchedSong = (song) => {        
+        let Songholder = document.querySelector(".c-song-search__holder");
+        try {Songholder.append(song)} catch (error) {}
+    }
     //#endregion
 
     const UpdateData = (room) => {
         let amount = document.querySelector(".js-amount");
         amount.textContent = `This room has ${room.participants.length} people in it.`
     }
-    
 
-    const GenerateList = () => {
-        generator = document.querySelector(".js-test")
-        generator.addEventListener("click", () => {
-            roomcode = document.querySelector(".js-room-code-text").textContent
-            DataAccess.queueSong(connection, roomcode)
-        })
-    } 
+    const onVideoClick = (id, title, creator) => {
+        let roomcode = document.querySelector(".js-room-code-text").textContent
+        DataAccess.queueSong(connection, roomcode, id, title, creator)
+    }
+
+    const songEnded = () =>{
+        DataAccess.songEnded(connection)
+    }
 
     return {
         AppSetup: AppSetup,
@@ -101,7 +106,9 @@ const SonusUI = (function () {
         appendHost:appendHost,
         appendClient:appendClient,
         UpdateData:UpdateData,
-        GenerateList:GenerateList,
-        appendSong:appendSong
+        appendSong:appendSong,
+        appendSearchedSong:appendSearchedSong,
+        onVideoClick:onVideoClick,
+        songEnded:songEnded
     };
 })();

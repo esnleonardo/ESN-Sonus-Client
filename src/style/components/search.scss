@@ -28,21 +28,36 @@ input.c-song-search__input[type="text"]:focus{
 }
 
 .c-song-search__holder{
+    transform: skewX(-12deg);
+}
 
+.c-song-search__holder-container{
+    display: flex;
+    justify-content: space-between;
+    padding-right: 180px;    
+    min-width: 420px;
+    margin: var(--margin-small) 0;
+}
+
+.c-song-search__holder-container:hover{
+    background-color: var(--color-esn-orange);
+}
+
+.c-song-search__holder-container:hover .u-font-light{
+    color: white;
 }
 
 .c-song-search__holder-detail-container{
-
-}
-
-.c-song-search__holder-detail__item{
-
-}
-
-.c-song-search__holder-detail__item{
-
+    transform: skewX(12deg);
+    height: fit-content;
+    margin: auto var(--margin-small);
 }
 
 .c-song-search__holder-image-container{
-    
+    transform: skewX(12deg);
+    margin-left: var(--margin-small);
+}
+
+.c-song-search__holder-detail__item{
+    margin-bottom: var(--margin-small);
 }
